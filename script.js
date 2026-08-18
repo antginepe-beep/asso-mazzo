@@ -240,7 +240,6 @@ function renderGameBoard() {
   
   updateHandTotal();
 }
-}
 
 function completeHand() {
   if (!state.currentGame || state.currentGame.isFinished || !HAND_FORM) {
