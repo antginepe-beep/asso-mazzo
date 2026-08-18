@@ -261,6 +261,70 @@ button:hover {
   align-items: center;
 }
 
+.hand-controls {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.score-input-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.8);
+  overflow: hidden;
+}
+
+.score-input-wrapper input {
+  border: none;
+  background: transparent;
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 8px 4px;
+  color: var(--primary);
+}
+
+.score-btn {
+  background: rgba(34, 197, 94, 0.2);
+  border: none;
+  color: var(--primary);
+  padding: 8px 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.15s ease;
+}
+
+.score-btn:hover {
+  background: rgba(34, 197, 94, 0.35);
+  transform: none;
+}
+
+.score-btn:active {
+  background: rgba(34, 197, 94, 0.5);
+}
+
+.score-btn.minus {
+  border-right: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.rank-card {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+}
+
+.rank-card:hover {
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.5);
+}
+
 @media (max-width: 760px) {
   .game-layout {
     grid-template-columns: 1fr;

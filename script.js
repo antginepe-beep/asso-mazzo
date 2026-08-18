@@ -193,10 +193,13 @@ function renderGameBoard() {
             <strong>${player.name}</strong>
             <span class="small-total">Totale: ${currentTotal} punti</span>
           </div>
-          <label>
-            Punti
-            <input type="number" min="0" step="1" value="0" data-player-index="${index}" />
-          </label>
+          <div class="hand-controls">
+            <div class="score-input-wrapper">
+              <button class="score-btn minus" data-player-index="${index}" type="button">−</button>
+              <input type="number" min="0" step="1" value="0" data-player-index="${index}" />
+              <button class="score-btn plus" data-player-index="${index}" type="button">+</button>
+            </div>
+          </div>
         </div>
       `;
     })
@@ -220,6 +223,13 @@ function renderGameBoard() {
       `;
     })
     .join('');
+
+  // Add event listeners for score buttons
+  if (HAND_FORM) {
+    HAND_FORM.querySelectorAll('.score-btn').forEach(button => {
+      button.addEventListener('click', handleScoreButtonClick);
+    });
+  }
 }
 
 function completeHand() {
@@ -227,7 +237,7 @@ function completeHand() {
     return;
   }
 
-  const scores = Array.from(HAND_FORM.querySelectorAll('input')).map((input) => input.value);
+  const scores = Array.from(HAND_FORM.querySelectorAll('input[type="number"]')).map((input) => input.value);
   const nextGame = applyHandToGame(state.currentGame, scores);
   state.currentGame = nextGame;
 
@@ -239,6 +249,31 @@ function completeHand() {
   }
 
   renderGameBoard();
+}
+
+function handleScoreButtonClick(event) {
+  if (!HAND_FORM) return;
+  
+  const button = event.target;
+  const isPlus = button.classList.contains('plus');
+  const isMinus = button.classList.contains('minus');
+  
+  if (!isPlus && !isMinus) return;
+  
+  const playerIndex = Number(button.dataset.playerIndex);
+  const input = HAND_FORM.querySelector(`input[data-player-index="${playerIndex}"]`);
+  
+  if (!input) return;
+  
+  let currentValue = Number(input.value) || 0;
+  
+  if (isPlus) {
+    currentValue += 1;
+  } else if (isMinus && currentValue > 0) {
+    currentValue -= 1;
+  }
+  
+  input.value = currentValue;
 }
 
 function resetToSetup() {
