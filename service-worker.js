@@ -1,10 +1,11 @@
-const CACHE_NAME = 'asso-mazzo-v1';
+const CACHE_NAME = 'asso-mazzo-v2';
+const APP_BASE = self.location.pathname.replace(/\/service-worker\.js$/, '') || '/';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/manifest.json'
+  `${APP_BASE}/`,
+  `${APP_BASE}/index.html`,
+  `${APP_BASE}/style.css`,
+  `${APP_BASE}/script.js`,
+  `${APP_BASE}/manifest.json`
 ];
 
 // Install event - cache files
