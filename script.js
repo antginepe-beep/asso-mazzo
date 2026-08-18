@@ -233,7 +233,13 @@ function renderGameBoard() {
     HAND_FORM.querySelectorAll('.volo-btn').forEach(button => {
       button.addEventListener('click', handleVoloButtonClick);
     });
+    HAND_FORM.querySelectorAll('input[type="number"]').forEach(input => {
+      input.addEventListener('input', updateHandTotal);
+    });
   }
+  
+  updateHandTotal();
+}
 }
 
 function completeHand() {
@@ -242,6 +248,14 @@ function completeHand() {
   }
 
   const scores = Array.from(HAND_FORM.querySelectorAll('input[type="number"]')).map((input) => input.value);
+  const total = scores.reduce((sum, score) => sum + Number(score), 0);
+
+  // Validazione: il totale deve essere esattamente 21
+  if (total !== 21) {
+    alert(`❌ Errore! Il totale deve essere esattamente 21 punti.\nAttualmente: ${total} punti`);
+    return;
+  }
+
   const nextGame = applyHandToGame(state.currentGame, scores);
   state.currentGame = nextGame;
 
@@ -253,6 +267,28 @@ function completeHand() {
   }
 
   renderGameBoard();
+}
+
+function updateHandTotal() {
+  if (!HAND_FORM || !ADVANCE_TURN_BUTTON) return;
+
+  const scores = Array.from(HAND_FORM.querySelectorAll('input[type="number"]')).map((input) => Number(input.value) || 0);
+  const total = scores.reduce((sum, score) => sum + score, 0);
+  const isValid = total === 21;
+
+  // Aggiorna il testo del bottone con il totale
+  ADVANCE_TURN_BUTTON.textContent = `Conferma mano (${total}/21)`;
+
+  // Abilita/disabilita il bottone in base alla validazione
+  if (isValid) {
+    ADVANCE_TURN_BUTTON.classList.remove('invalid');
+    ADVANCE_TURN_BUTTON.classList.add('valid');
+    ADVANCE_TURN_BUTTON.disabled = false;
+  } else {
+    ADVANCE_TURN_BUTTON.classList.remove('valid');
+    ADVANCE_TURN_BUTTON.classList.add('invalid');
+    ADVANCE_TURN_BUTTON.disabled = true;
+  }
 }
 
 function handleScoreButtonClick(event) {
