@@ -590,17 +590,109 @@ button:hover {
 }
 
 @media (max-width: 760px) {
-  .game-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .status-bar,
-  .field-row.split {
-    grid-template-columns: 1fr;
+  .app-shell {
+    padding: 20px 12px 36px;
   }
 
   .topbar {
     flex-direction: column;
     align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: 16px;
+  }
+
+  .panel {
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+
+  .field-row {
+    margin-bottom: 14px;
+  }
+
+  .field-row.split,
+  .status-bar,
+  .game-layout,
+  .player-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  label {
+    font-size: 0.92rem;
+  }
+
+  input,
+  select,
+  button {
+    font-size: 16px;
+  }
+
+  .primary-button,
+  .ghost-button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .hand-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 10px;
+  }
+
+  .hand-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .score-input-wrapper {
+    min-height: 48px;
+  }
+
+  .score-btn,
+  .volo-btn {
+    min-height: 44px;
+  }
+
+  .score-btn {
+    min-width: 42px;
+  }
+
+  .rank-head,
+  .rank-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .history-list li {
+    font-size: 0.88rem;
+  }
+
+  .stat-card {
+    padding: 12px 10px;
+  }
+}
+
+@media (max-width: 420px) {
+  .hand-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .score-input-wrapper {
+    order: 1;
+  }
+
+  .volo-btn {
+    order: 2;
+    width: 100%;
+  }
+
+  .status-bar > div {
+    padding: 12px 14px;
+  }
+
+  .label {
+    margin-bottom: 6px;
   }
 }
