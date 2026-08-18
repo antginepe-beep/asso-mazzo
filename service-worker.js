@@ -1,4 +1,4 @@
-const CACHE_NAME = 'asso-mazzo-v3';
+const CACHE_NAME = 'asso-mazzo-v4';
 const APP_BASE = self.location.pathname.replace(/\/service-worker\.js$/, '') || '/';
 const urlsToCache = [
   `${APP_BASE}/`,
