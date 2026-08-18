@@ -77,7 +77,20 @@ test('getWinProbability uses the last five matches', () => {
   assert.equal(getWinProbability('Charlie', ['Alice', 'Bob', 'Alice']), 0);
 });
 
-test('applyHandToGame ends the match when any player reaches the target threshold', () => {
+test('applyHandToGame supports the special volo rule: only the volo player gets -21 and everyone else stays at 0', () => {
+  const game = createGame({
+    playerNames: ['Alice', 'Bob', 'Charlie'],
+    targetPoints: 151,
+    firstDealerIndex: 0,
+  });
+
+  applyHandToGame(game, [0, -21, 0]);
+
+  assert.deepEqual(game.players.map((player) => player.total), [0, -21, 0]);
+  assert.equal(game.players[1].handScores[0], -21);
+});
+
+test('applyHandToGame ends when a player exceeds the threshold at any point in the match; that player loses and the best remaining players win', () => {
   const game = createGame({
     playerNames: ['Alice', 'Bob', 'Charlie'],
     targetPoints: 150,
@@ -91,5 +104,7 @@ test('applyHandToGame ends the match when any player reaches the target threshol
   applyHandToGame(game, [10, 30, 0]);
 
   assert.equal(game.isFinished, true);
-  assert.equal(game.winner, 'Bob');
+  assert.equal(game.loser, 'Alice');
+  assert.equal(game.winner, 'Charlie');
+  assert.deepEqual(game.winners, ['Charlie']);
 });

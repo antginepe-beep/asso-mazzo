@@ -13,6 +13,7 @@ const GAME_SCREEN = typeof document !== 'undefined' ? document.getElementById('g
 const SETUP_SCREEN = typeof document !== 'undefined' ? document.getElementById('setup-screen') : null;
 const HAND_FORM = typeof document !== 'undefined' ? document.getElementById('hand-form') : null;
 const CLASSIFICATION_CONTAINER = typeof document !== 'undefined' ? document.getElementById('classification') : null;
+const PLAYER_STATS_CONTAINER = typeof document !== 'undefined' ? document.getElementById('player-stats') : null;
 const DEALER_DISPLAY = typeof document !== 'undefined' ? document.getElementById('dealer-display') : null;
 const ROUND_DISPLAY = typeof document !== 'undefined' ? document.getElementById('round-display') : null;
 const TARGET_DISPLAY = typeof document !== 'undefined' ? document.getElementById('target-display') : null;
@@ -26,6 +27,7 @@ export function buildPlayers(names) {
     name: name.trim(),
     total: 0,
     handScores: [],
+    voloCount: 0,
   }));
 }
 
@@ -45,12 +47,24 @@ export function createGame({ playerNames, targetPoints = 151, firstDealerIndex =
     roundNumber: 1,
     isFinished: false,
     winner: null,
+    winners: [],
+    loser: null,
+    voloPlayerIndex: null,
   };
 }
 
-export function calculateWinner(players) {
-  const lowestTotal = Math.min(...players.map((player) => player.total));
-  const winners = players.filter((player) => player.total === lowestTotal);
+export function getWinningSlots(playerCount) {
+  return Math.max(1, playerCount - 2);
+}
+
+export function getWinners(players, loserName = null) {
+  const sortedPlayers = [...players].sort((left, right) => left.total - right.total);
+  const candidates = loserName ? sortedPlayers.filter((player) => player.name !== loserName) : sortedPlayers;
+  return candidates.slice(0, getWinningSlots(players.length));
+}
+
+export function calculateWinner(players, loserName = null) {
+  const winners = getWinners(players, loserName);
   return winners[0] ?? null;
 }
 
@@ -67,6 +81,7 @@ export function computeLeaderboard(players, matchHistory = []) {
       ...player,
       averagePoints: player.handScores.length ? player.total / player.handScores.length : 0,
       winProbability: getWinProbability(player.name, matchHistory),
+      handsPlayed: player.handScores.length,
     }))
     .sort((left, right) => {
       if (left.total !== right.total) {
@@ -74,6 +89,21 @@ export function computeLeaderboard(players, matchHistory = []) {
       }
       return left.name.localeCompare(right.name);
     });
+}
+
+export function getPlayerStats(players, matchHistory = []) {
+  return players
+    .map((player) => {
+      const handsPlayed = player.handScores.length;
+      const averagePoints = handsPlayed ? player.total / handsPlayed : 0;
+      return {
+        ...player,
+        averagePoints,
+        handsPlayed,
+        winProbability: getWinProbability(player.name, matchHistory),
+      };
+    })
+    .sort((left, right) => right.total - left.total);
 }
 
 export function applyHandToGame(game, handScores) {
@@ -84,15 +114,19 @@ export function applyHandToGame(game, handScores) {
   }
 
   game.players.forEach((player, index) => {
-    const score = Math.max(0, normalizedScores[index]);
+    const score = normalizedScores[index];
     player.total += score;
     player.handScores.push(score);
   });
 
-  if (game.players.some((player) => player.total >= game.targetPoints)) {
-    const winner = calculateWinner(game.players);
+  const loser = game.players.find((player) => player.total >= game.targetPoints) ?? null;
+
+  if (loser) {
+    const winners = getWinners(game.players, loser.name);
     game.isFinished = true;
-    game.winner = winner ? winner.name : null;
+    game.loser = loser.name;
+    game.winners = winners.map((player) => player.name);
+    game.winner = winners[0]?.name ?? null;
     return game;
   }
 
@@ -146,7 +180,7 @@ function openGame() {
     return;
   }
 
-  const targetPoints = Number(TARGET_POINTS_SELECT.value) || 151;
+  const targetPoints = Number(TARGET_POINTS_SELECT.value) || 3;
   const firstDealerIndex = Number(FIRST_DEALER_SELECT.value) || 0;
 
   state.currentGame = createGame({
@@ -167,7 +201,7 @@ function renderGameBoard() {
     return;
   }
 
-  if (!TARGET_DISPLAY || !DEALER_DISPLAY || !ROUND_DISPLAY || !HAND_FORM || !CLASSIFICATION_CONTAINER || !WINNER_BANNER) {
+  if (!TARGET_DISPLAY || !DEALER_DISPLAY || !ROUND_DISPLAY || !HAND_FORM || !CLASSIFICATION_CONTAINER || !WINNER_BANNER || !PLAYER_STATS_CONTAINER) {
     return;
   }
 
@@ -177,9 +211,12 @@ function renderGameBoard() {
 
   if (game.isFinished && game.winner) {
     const sortedPlayers = computeLeaderboard(game.players, state.matchHistory);
-    const winner = sortedPlayers[0];
+    const winnerNames = game.winners.length ? game.winners : [game.winner];
+    const winnerText = winnerNames.join(', ');
+    const loserText = game.loser ? ` • ${game.loser} perde a ${game.players.find((player) => player.name === game.loser)?.total ?? 0} punti` : '';
+    const firstWinner = sortedPlayers.find((player) => player.name === winnerNames[0]) ?? sortedPlayers[0];
     WINNER_BANNER.hidden = false;
-    WINNER_BANNER.textContent = `Partita terminata: ${winner.name} vince con ${winner.total} punti.`;
+    WINNER_BANNER.textContent = `Partita terminata: ${winnerText} vincono con ${firstWinner.total} punti.${loserText}`;
   } else {
     WINNER_BANNER.hidden = true;
   }
@@ -196,7 +233,7 @@ function renderGameBoard() {
           <div class="hand-controls">
             <div class="score-input-wrapper">
               <button class="score-btn minus" data-player-index="${index}" type="button">−</button>
-              <input type="number" min="0" step="1" value="0" data-player-index="${index}" />
+              <input type="number" min="-21" max="21" step="1" value="0" data-player-index="${index}" data-volo="false" />
               <button class="score-btn plus" data-player-index="${index}" type="button">+</button>
             </div>
             <button class="volo-btn" data-player-index="${index}" type="button" title="Volo -21 punti">✈️ Volo</button>
@@ -225,7 +262,36 @@ function renderGameBoard() {
     })
     .join('');
 
-  // Add event listeners for score buttons
+  const stats = getPlayerStats(game.players, state.matchHistory);
+  const recentHistory = state.matchHistory.length
+    ? state.matchHistory
+        .slice()
+        .reverse()
+        .map((winner, index) => `<li><span>#${state.matchHistory.length - index}</span><strong>${winner}</strong></li>`)
+        .join('')
+    : '<li class="empty-history">Nessuna partita recente</li>';
+
+  PLAYER_STATS_CONTAINER.innerHTML = `
+    <div class="stats-header">
+      <h3>Statistiche</h3>
+    </div>
+    <div class="stats-grid">
+      ${stats
+        .map((player) => `
+          <article class="stat-card">
+            <span class="stat-label">${player.name}</span>
+            <strong>${player.total} pt</strong>
+            <small>Media: ${player.averagePoints.toFixed(1)} • Mani: ${player.handsPlayed} • Volo: ${player.voloCount}</small>
+          </article>
+        `)
+        .join('')}
+    </div>
+    <div class="history-panel">
+      <h4>Storico recenti</h4>
+      <ul class="history-list">${recentHistory}</ul>
+    </div>
+  `;
+
   if (HAND_FORM) {
     HAND_FORM.querySelectorAll('.score-btn').forEach(button => {
       button.addEventListener('click', handleScoreButtonClick);
@@ -234,11 +300,28 @@ function renderGameBoard() {
       button.addEventListener('click', handleVoloButtonClick);
     });
     HAND_FORM.querySelectorAll('input[type="number"]').forEach(input => {
-      input.addEventListener('input', updateHandTotal);
+      input.addEventListener('input', handleManualScoreInput);
     });
   }
-  
+
   updateHandTotal();
+}
+
+function getHandScoresFromForm() {
+  if (!HAND_FORM) {
+    return { scores: [], voloPlayerIndex: null };
+  }
+
+  const inputs = Array.from(HAND_FORM.querySelectorAll('input[type="number"]'));
+  const voloPlayerIndex = inputs.findIndex((input) => input.dataset.volo === 'true');
+
+  if (voloPlayerIndex === -1) {
+    const scores = inputs.map((input) => Number(input.value) || 0);
+    return { scores, voloPlayerIndex };
+  }
+
+  const scores = inputs.map((input, index) => (index === voloPlayerIndex ? -21 : 0));
+  return { scores, voloPlayerIndex };
 }
 
 function completeHand() {
@@ -246,20 +329,28 @@ function completeHand() {
     return;
   }
 
-  const scores = Array.from(HAND_FORM.querySelectorAll('input[type="number"]')).map((input) => input.value);
-  const total = scores.reduce((sum, score) => sum + Number(score), 0);
+  const { scores, voloPlayerIndex } = getHandScoresFromForm();
 
-  // Validazione: il totale deve essere esattamente 21
-  if (total !== 21) {
-    alert(`❌ Errore! Il totale deve essere esattamente 21 punti.\nAttualmente: ${total} punti`);
-    return;
+  if (voloPlayerIndex !== -1) {
+    const isValidVolo = scores[voloPlayerIndex] === -21 && scores.every((score, index) => index === voloPlayerIndex ? score === -21 : score === 0);
+    if (!isValidVolo) {
+      alert('❌ Il volo è valido solo se un giocatore prende -21 e gli altri restano a 0.');
+      return;
+    }
+    state.currentGame.players[voloPlayerIndex].voloCount += 1;
+  } else {
+    const total = scores.reduce((sum, score) => sum + Number(score), 0);
+    if (total !== 21) {
+      alert(`❌ Errore! Il totale deve essere esattamente 21 punti.\nAttualmente: ${total} punti`);
+      return;
+    }
   }
 
   const nextGame = applyHandToGame(state.currentGame, scores);
   state.currentGame = nextGame;
 
-  if (nextGame.isFinished && nextGame.winner) {
-    state.matchHistory.push(nextGame.winner);
+  if (nextGame.isFinished && nextGame.winners.length) {
+    state.matchHistory.push(...nextGame.winners);
     if (state.matchHistory.length > MAX_HISTORY) {
       state.matchHistory = state.matchHistory.slice(-MAX_HISTORY);
     }
@@ -271,14 +362,33 @@ function completeHand() {
 function updateHandTotal() {
   if (!HAND_FORM || !ADVANCE_TURN_BUTTON) return;
 
-  const scores = Array.from(HAND_FORM.querySelectorAll('input[type="number"]')).map((input) => Number(input.value) || 0);
+  const inputs = Array.from(HAND_FORM.querySelectorAll('input[type="number"]'));
+  const voloIndex = inputs.findIndex((input) => input.dataset.volo === 'true');
+
+  if (voloIndex !== -1) {
+    const othersAreZero = inputs.every((input, index) => index === voloIndex ? true : Number(input.value) || 0 === 0);
+    const isValid = othersAreZero && inputs[voloIndex].value === '-21';
+
+    ADVANCE_TURN_BUTTON.textContent = 'Conferma mano (Volo: -21)';
+
+    if (isValid) {
+      ADVANCE_TURN_BUTTON.classList.remove('invalid');
+      ADVANCE_TURN_BUTTON.classList.add('valid');
+      ADVANCE_TURN_BUTTON.disabled = false;
+    } else {
+      ADVANCE_TURN_BUTTON.classList.remove('valid');
+      ADVANCE_TURN_BUTTON.classList.add('invalid');
+      ADVANCE_TURN_BUTTON.disabled = true;
+    }
+    return;
+  }
+
+  const scores = inputs.map((input) => Number(input.value) || 0);
   const total = scores.reduce((sum, score) => sum + score, 0);
   const isValid = total === 21;
 
-  // Aggiorna il testo del bottone con il totale
   ADVANCE_TURN_BUTTON.textContent = `Conferma mano (${total}/21)`;
 
-  // Abilita/disabilita il bottone in base alla validazione
   if (isValid) {
     ADVANCE_TURN_BUTTON.classList.remove('invalid');
     ADVANCE_TURN_BUTTON.classList.add('valid');
@@ -292,44 +402,99 @@ function updateHandTotal() {
 
 function handleScoreButtonClick(event) {
   if (!HAND_FORM) return;
-  
+
   const button = event.target;
   const isPlus = button.classList.contains('plus');
   const isMinus = button.classList.contains('minus');
-  
+
   if (!isPlus && !isMinus) return;
-  
+
   const playerIndex = Number(button.dataset.playerIndex);
   const input = HAND_FORM.querySelector(`input[data-player-index="${playerIndex}"]`);
-  
+
   if (!input) return;
-  
+
+  if (input.dataset.volo === 'true') {
+    input.dataset.volo = 'false';
+    input.value = 0;
+    updateHandTotal();
+    return;
+  }
+
   let currentValue = Number(input.value) || 0;
-  
+
   if (isPlus) {
     currentValue += 1;
   } else if (isMinus && currentValue > 0) {
     currentValue -= 1;
   }
-  
+
   input.value = currentValue;
+  updateHandTotal();
+}
+
+function handleManualScoreInput(event) {
+  const input = event.target;
+  if (!input) return;
+
+  const allInputs = Array.from(HAND_FORM.querySelectorAll('input[type="number"]'));
+  const activeVolo = allInputs.findIndex((item) => item.dataset.volo === 'true');
+
+  if (activeVolo !== -1) {
+    allInputs.forEach((item) => {
+      if (item !== input) {
+        item.value = 0;
+        item.dataset.volo = 'false';
+      }
+    });
+    input.dataset.volo = 'true';
+    input.value = -21;
+    updateHandTotal();
+    return;
+  }
+
+  const currentValue = Number(input.value) || 0;
+  if (currentValue < 0) {
+    input.value = 0;
+  }
+
+  updateHandTotal();
 }
 
 function handleVoloButtonClick(event) {
   event.preventDefault();
   if (!HAND_FORM) return;
-  
+
   const button = event.target;
   const playerIndex = Number(button.dataset.playerIndex);
-  const input = HAND_FORM.querySelector(`input[data-player-index="${playerIndex}"]`);
-  
+  const inputs = Array.from(HAND_FORM.querySelectorAll('input[type="number"]'));
+  const input = inputs[playerIndex];
+
   if (!input) return;
-  
-  // Sottrai 21 punti (aggiungi 21 al punteggio della mano, che viene sottratto dal totale)
-  const currentValue = Number(input.value) || 0;
-  input.value = currentValue + 21;
-  
-  // Aggiungi effetto visivo al bottone
+
+  const activeVoloIndex = inputs.findIndex((item) => item.dataset.volo === 'true');
+
+  if (activeVoloIndex === playerIndex) {
+    inputs.forEach((item) => {
+      item.dataset.volo = 'false';
+      item.value = 0;
+    });
+    button.classList.remove('volo-triggered');
+    updateHandTotal();
+    return;
+  }
+
+  if (activeVoloIndex !== -1) {
+    alert('❌ Nel turno corrente il volo può essere assegnato a un solo giocatore.');
+    return;
+  }
+
+  inputs.forEach((item, index) => {
+    item.dataset.volo = index === playerIndex ? 'true' : 'false';
+    item.value = index === playerIndex ? -21 : 0;
+  });
+  updateHandTotal();
+
   button.classList.add('volo-triggered');
   setTimeout(() => button.classList.remove('volo-triggered'), 600);
 }
@@ -349,7 +514,10 @@ function resetToSetup() {
     NEW_MATCH_BUTTON.hidden = true;
   }
   if (PLAYER_COUNT_INPUT) {
-    PLAYER_COUNT_INPUT.value = '4';
+    PLAYER_COUNT_INPUT.value = '2';
+  }
+  if (TARGET_POINTS_SELECT) {
+    TARGET_POINTS_SELECT.value = '3';
   }
   renderPlayerInputs();
 }
