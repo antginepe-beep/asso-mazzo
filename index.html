@@ -18,9 +18,14 @@
           <p class="eyebrow">Asso Mazzo</p>
           <h1>Gestione punteggio</h1>
         </div>
-        <button id="new-match-button" class="ghost-button" type="button" hidden>
-          Fine partita
-        </button>
+        <div class="topbar-actions">
+          <button id="stats-toggle-button" class="ghost-button" type="button">
+            Statistiche
+          </button>
+          <button id="new-match-button" class="ghost-button" type="button" hidden>
+            Fine partita
+          </button>
+        </div>
       </header>
 
       <section id="setup-screen" class="panel">
@@ -86,6 +91,16 @@
             <div id="player-stats" class="player-stats"></div>
           </aside>
         </div>
+      </section>
+
+      <section id="stats-screen" class="panel stats-screen" hidden>
+        <div class="stats-screen-header">
+          <h2>Statistiche globali</h2>
+          <button id="reset-stats-button" class="ghost-button danger-button" type="button">
+            Reset statistiche
+          </button>
+        </div>
+        <div id="global-stats-content" class="global-stats-content"></div>
       </section>
     </main>
 

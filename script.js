@@ -1,8 +1,72 @@
 const MAX_HISTORY = 5;
+const STORAGE_KEY = 'asso-mazzo-global-stats';
 const state = {
   matchHistory: [],
   currentGame: null,
+  globalStats: {},
+  statsViewVisible: false,
 };
+
+export function loadGlobalStats() {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveGlobalStats(stats) {
+  if (typeof window === 'undefined') {
+    return stats;
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+  return stats;
+}
+
+export function resetGlobalStats() {
+  state.globalStats = {};
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(STORAGE_KEY);
+  }
+  return state.globalStats;
+}
+
+export function mergeGlobalStats(stats = {}, players = [], winnerName = null) {
+  const nextStats = { ...stats };
+
+  players.forEach((player) => {
+    const playerName = player.name;
+    const existing = nextStats[playerName] ?? {
+      name: playerName,
+      matches: 0,
+      wins: 0,
+      handsPlayed: 0,
+      totalPoints: 0,
+      voloCount: 0,
+    };
+
+    existing.matches += 1;
+    existing.handsPlayed += Array.isArray(player.handScores) ? player.handScores.length : 0;
+    existing.totalPoints += Number(player.total) || 0;
+    existing.voloCount += Number(player.voloCount) || 0;
+
+    if (winnerName && playerName === winnerName) {
+      existing.wins += 1;
+    }
+
+    nextStats[playerName] = existing;
+  });
+
+  return nextStats;
+}
+
+state.globalStats = loadGlobalStats();
 
 const PLAYER_COUNT_INPUT = typeof document !== 'undefined' ? document.getElementById('player-count') : null;
 const PLAYER_INPUTS_CONTAINER = typeof document !== 'undefined' ? document.getElementById('player-inputs') : null;
@@ -20,6 +84,10 @@ const TARGET_DISPLAY = typeof document !== 'undefined' ? document.getElementById
 const WINNER_BANNER = typeof document !== 'undefined' ? document.getElementById('winner-banner') : null;
 const NEW_MATCH_BUTTON = typeof document !== 'undefined' ? document.getElementById('new-match-button') : null;
 const ADVANCE_TURN_BUTTON = typeof document !== 'undefined' ? document.getElementById('advance-turn') : null;
+const STATS_TOGGLE_BUTTON = typeof document !== 'undefined' ? document.getElementById('stats-toggle-button') : null;
+const STATS_SCREEN = typeof document !== 'undefined' ? document.getElementById('stats-screen') : null;
+const GLOBAL_STATS_CONTENT = typeof document !== 'undefined' ? document.getElementById('global-stats-content') : null;
+const RESET_STATS_BUTTON = typeof document !== 'undefined' ? document.getElementById('reset-stats-button') : null;
 
 export function buildPlayers(names) {
   return names.map((name, index) => ({
@@ -292,6 +360,8 @@ function renderGameBoard() {
     </div>
   `;
 
+  renderGlobalStats();
+
   if (HAND_FORM) {
     HAND_FORM.querySelectorAll('.score-btn').forEach(button => {
       button.addEventListener('click', handleScoreButtonClick);
@@ -354,6 +424,9 @@ function completeHand() {
     if (state.matchHistory.length > MAX_HISTORY) {
       state.matchHistory = state.matchHistory.slice(-MAX_HISTORY);
     }
+
+    state.globalStats = mergeGlobalStats(state.globalStats, nextGame.players, nextGame.winner);
+    saveGlobalStats(state.globalStats);
   }
 
   renderGameBoard();
@@ -499,6 +572,49 @@ function handleVoloButtonClick(event) {
   setTimeout(() => button.classList.remove('volo-triggered'), 600);
 }
 
+function renderGlobalStats() {
+  if (!GLOBAL_STATS_CONTENT) {
+    return;
+  }
+
+  const stats = Object.values(state.globalStats || {}).sort((left, right) => right.matches - left.matches || right.wins - left.wins);
+
+  if (!stats.length) {
+    GLOBAL_STATS_CONTENT.innerHTML = '<div class="empty-state">Nessuna statistica salvata.</div>';
+    return;
+  }
+
+  GLOBAL_STATS_CONTENT.innerHTML = `
+    <div class="global-stats-grid">
+      ${stats
+        .map((entry) => `
+          <article class="global-stat-card">
+            <span class="stat-label">${entry.name}</span>
+            <strong>${entry.wins} vittorie</strong>
+            <small>Partite: ${entry.matches} • Mani: ${entry.handsPlayed} • Volo: ${entry.voloCount}</small>
+          </article>
+        `)
+        .join('')}
+    </div>
+  `;
+}
+
+function toggleStatsView() {
+  state.statsViewVisible = !state.statsViewVisible;
+  if (STATS_SCREEN) {
+    STATS_SCREEN.hidden = !state.statsViewVisible;
+  }
+  if (GAME_SCREEN) {
+    GAME_SCREEN.hidden = state.statsViewVisible;
+  }
+  if (SETUP_SCREEN) {
+    SETUP_SCREEN.hidden = state.statsViewVisible;
+  }
+  if (STATS_TOGGLE_BUTTON) {
+    STATS_TOGGLE_BUTTON.textContent = state.statsViewVisible ? 'Torna al gioco' : 'Statistiche';
+  }
+}
+
 function resetToSetup() {
   state.currentGame = null;
   if (WINNER_BANNER) {
@@ -514,10 +630,10 @@ function resetToSetup() {
     NEW_MATCH_BUTTON.hidden = true;
   }
   if (PLAYER_COUNT_INPUT) {
-    PLAYER_COUNT_INPUT.value = '2';
+    PLAYER_COUNT_INPUT.value = '4';
   }
   if (TARGET_POINTS_SELECT) {
-    TARGET_POINTS_SELECT.value = '3';
+    TARGET_POINTS_SELECT.value = '151';
   }
   renderPlayerInputs();
 }
@@ -537,7 +653,17 @@ if (ADVANCE_TURN_BUTTON) {
 if (NEW_MATCH_BUTTON) {
   NEW_MATCH_BUTTON.addEventListener('click', resetToSetup);
 }
+if (STATS_TOGGLE_BUTTON) {
+  STATS_TOGGLE_BUTTON.addEventListener('click', toggleStatsView);
+}
+if (RESET_STATS_BUTTON) {
+  RESET_STATS_BUTTON.addEventListener('click', () => {
+    resetGlobalStats();
+    renderGlobalStats();
+  });
+}
 
 if (typeof document !== 'undefined') {
   renderPlayerInputs();
+  renderGlobalStats();
 }

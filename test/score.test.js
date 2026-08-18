@@ -7,8 +7,27 @@ import {
   computeLeaderboard,
   createGame,
   getWinProbability,
+  mergeGlobalStats,
+  resetGlobalStats,
   rotateDealer,
 } from '../script.js';
+
+test('mergeGlobalStats aggregates results across matches and reset clears them', () => {
+  const stats = mergeGlobalStats({}, [
+    { name: 'Alice', total: 30, handScores: [10, 20], voloCount: 1 },
+    { name: 'Bob', total: 40, handScores: [15, 25], voloCount: 0 },
+  ], 'Alice');
+
+  assert.equal(stats.Alice.matches, 1);
+  assert.equal(stats.Alice.wins, 1);
+  assert.equal(stats.Alice.handsPlayed, 2);
+  assert.equal(stats.Alice.voloCount, 1);
+  assert.equal(stats.Bob.matches, 1);
+  assert.equal(stats.Bob.wins, 0);
+
+  resetGlobalStats();
+  assert.deepEqual(resetGlobalStats(), {});
+});
 
 test('rotateDealer cycles among players', () => {
   assert.equal(rotateDealer(0, 4), 1);
