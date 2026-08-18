@@ -1,25 +1,25 @@
 :root {
-  --bg: #051a12;
-  --bg-2: #12392b;
-  --bg-3: #0d261d;
-  --panel: rgba(14, 35, 29, 0.88);
-  --panel-alt: rgba(9, 25, 20, 0.96);
-  --surface: #f8fafc;
-  --surface-strong: #e2e8f0;
-  --text: #eefaf2;
-  --muted: #b6c8bc;
-  --primary: #f7c948;
-  --primary-dark: #e0a91a;
-  --accent: #ffbf47;
-  --danger: #ff5c6d;
-  --success: #37d67a;
-  --shadow: rgba(0, 0, 0, 0.45);
+  --bg: #f3f4f6;
+  --bg-2: #e5e7eb;
+  --bg-3: #ffffff;
+  --panel: #ffffff;
+  --panel-alt: #f8fafc;
+  --surface: #ffffff;
+  --surface-strong: #ebedf0;
+  --text: #111111;
+  --muted: #5b6470;
+  --primary: #d60d1d;
+  --primary-dark: #a20a16;
+  --accent: #d60d1d;
+  --danger: #d60d1d;
+  --success: #0d9d4e;
+  --shadow: rgba(17, 17, 17, 0.10);
   --gold: #f5c95b;
-  --red: #d72638;
-  --volo: #f24b6a;
-  --volo-light: #ff7a8b;
-  --line: rgba(255, 255, 255, 0.12);
-  --premium-glow: rgba(247, 201, 72, 0.22);
+  --red: #d60d1d;
+  --volo: #e11d48;
+  --volo-light: #f43f5e;
+  --line: rgba(17, 17, 17, 0.1);
+  --premium-glow: rgba(214, 13, 29, 0.12);
 }
 
 * {
@@ -30,9 +30,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
-  background:
-    radial-gradient(circle at top, rgba(247, 201, 72, 0.14), transparent 24%),
-    linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 38%, var(--bg-3) 100%);
+  background: linear-gradient(180deg, #f5f5f5 0%, #ffffff 100%);
   color: var(--text);
   position: relative;
 }
@@ -71,17 +69,11 @@ select {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 22px;
-  background:
-    linear-gradient(135deg, rgba(17, 45, 35, 0.98), rgba(8, 23, 19, 0.98)),
-    radial-gradient(circle at top left, rgba(247, 201, 72, 0.2), transparent 30%);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(247, 201, 72, 0.5);
-  border-radius: 26px;
+  background: linear-gradient(180deg, #111111 0%, #1b1b1b 100%);
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  border-radius: 18px;
   padding: 18px 22px;
-  box-shadow:
-    0 18px 35px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    0 0 0 1px rgba(247, 201, 72, 0.08);
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.08);
   animation: topbar-slide-in 0.5s ease-out;
   position: relative;
   overflow: hidden;
@@ -90,11 +82,9 @@ select {
 .topbar::after {
   content: '';
   position: absolute;
-  inset: -30% auto auto -10%;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(247, 201, 72, 0.18), transparent 62%);
-  pointer-events: none;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: linear-gradient(180deg, var(--primary), #ff5a69);
 }
 
 .brand-block {
@@ -110,9 +100,9 @@ select {
   align-self: flex-start;
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(247, 201, 72, 0.12);
-  border: 1px solid rgba(247, 201, 72, 0.3);
-  color: #f9dd8a;
+  background: rgba(214, 13, 29, 0.12);
+  border: 1px solid rgba(214, 13, 29, 0.25);
+  color: #ff596b;
   font-size: 0.63rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -124,7 +114,8 @@ select {
   font-size: clamp(1.9rem, 2.9vw, 2.8rem);
   letter-spacing: 0.04em;
   line-height: 1.05;
-  text-shadow: 0 6px 24px rgba(247, 201, 72, 0.2);
+  color: #ffffff;
+  text-shadow: none;
 }
 
 .topbar-actions {
@@ -139,20 +130,21 @@ select {
   gap: 8px;
   padding: 7px 10px;
   border-radius: 999px;
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #bbf7d0;
+  background: rgba(214, 13, 29, 0.12);
+  border: 1px solid rgba(214, 13, 29, 0.2);
+  color: #ff596b;
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-weight: 800;
 }
 
 .live-indicator .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #4ade80;
-  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+  background: #ff2f46;
+  box-shadow: 0 0 0 0 rgba(255, 47, 70, 0.55);
   animation: pulseDot 1.8s infinite;
 }
 
@@ -175,10 +167,11 @@ select {
 
 .eyebrow {
   margin: 0 0 4px;
-  color: var(--accent);
+  color: #ff596b;
   font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-weight: 800;
 }
 
 h1,
@@ -188,22 +181,18 @@ p {
 }
 
 .panel {
-  background:
-    linear-gradient(180deg, rgba(15, 38, 30, 0.97), rgba(8, 22, 19, 0.99)),
-    radial-gradient(circle at top, rgba(247, 201, 72, 0.08), transparent 42%);
-  border: 1px solid rgba(247, 201, 72, 0.32);
-  border-radius: 28px;
-  box-shadow:
-    0 24px 52px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    0 0 0 1px rgba(255,255,255,0.02);
+  background: #ffffff;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 10px 24px rgba(17, 17, 17, 0.06);
   padding: 28px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
   animation: panel-fade-in 0.4s ease-out;
 }
 
 .panel h2 {
   letter-spacing: 0.02em;
+  color: #111111;
 }
 
 @keyframes panel-fade-in {
@@ -261,9 +250,9 @@ button {
 }
 
 .ghost-button {
-  background: rgba(148, 163, 184, 0.08);
+  background: #ffffff;
   color: var(--text);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(17, 17, 17, 0.12);
   padding: 10px 14px;
   font-weight: 600;
 }
@@ -277,12 +266,12 @@ button:hover {
   color: white;
   padding: 12px 18px;
   font-weight: 700;
-  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+  box-shadow: 0 6px 16px rgba(214, 13, 29, 0.18);
   transition: all 0.2s ease;
 }
 
 .primary-button:hover:not(:disabled) {
-  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+  box-shadow: 0 10px 26px rgba(214, 13, 29, 0.22);
   transform: translateY(-2px);
 }
 
@@ -298,13 +287,12 @@ button:hover {
 }
 
 .primary-button.valid {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+  background: linear-gradient(135deg, #0d9d4e, #0b7d3e);
+  box-shadow: 0 6px 16px rgba(13, 157, 78, 0.2);
 }
 
 .primary-button.valid:hover {
-  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
-}
+  box-shadow: 0 10px 26px rgba(13, 157, 78, 0.24);
 
 .primary-button.invalid {
   background: linear-gradient(135deg, rgba(251, 191, 36, 0.5), rgba(217, 119, 6, 0.5));
@@ -333,11 +321,11 @@ button:hover {
 }
 
 .status-bar > div {
-  background: linear-gradient(180deg, rgba(16, 39, 31, 0.94), rgba(10, 23, 19, 0.96));
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
+  background: linear-gradient(180deg, #111111 0%, #1a1a1a 100%);
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  border-radius: 14px;
   padding: 14px 16px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 18px rgba(17, 17, 17, 0.06);
 }
 
 .label {
@@ -345,7 +333,7 @@ button:hover {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--muted);
+  color: #b5bac2;
   margin-bottom: 8px;
 }
 
@@ -356,20 +344,20 @@ button:hover {
   min-width: 92px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(214, 13, 29, 0.12);
+  color: #ff7581;
+  border: 1px solid rgba(214, 13, 29, 0.2);
 }
 
 .winner-banner {
   margin-bottom: 22px;
   padding: 14px 18px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(55, 214, 122, 0.22), rgba(34, 197, 94, 0.12));
-  border: 1px solid rgba(55, 214, 122, 0.45);
-  color: #e8fff1;
-  font-weight: 700;
-  box-shadow: 0 8px 18px rgba(55, 214, 122, 0.2);
+  background: linear-gradient(135deg, rgba(214, 13, 29, 0.08), rgba(17, 17, 17, 0.02));
+  border: 1px solid rgba(214, 13, 29, 0.2);
+  color: #111111;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(214, 13, 29, 0.08);
   animation: banner-pop 0.35s ease;
 }
 
@@ -387,13 +375,11 @@ button:hover {
 .board-column,
 .board-column,
 .ranking-column {
-  background:
-    linear-gradient(180deg, rgba(17, 40, 31, 0.84), rgba(12, 25, 21, 0.92)),
-    radial-gradient(circle at top, rgba(247, 201, 72, 0.07), transparent 48%);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
+  background: #f8f8f8;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  border-radius: 18px;
   padding: 18px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 18px rgba(17, 17, 17, 0.04);
 }
 
 .hand-form {
