@@ -199,6 +199,7 @@ function renderGameBoard() {
               <input type="number" min="0" step="1" value="0" data-player-index="${index}" />
               <button class="score-btn plus" data-player-index="${index}" type="button">+</button>
             </div>
+            <button class="volo-btn" data-player-index="${index}" type="button" title="Volo -21 punti">✈️ Volo</button>
           </div>
         </div>
       `;
@@ -228,6 +229,9 @@ function renderGameBoard() {
   if (HAND_FORM) {
     HAND_FORM.querySelectorAll('.score-btn').forEach(button => {
       button.addEventListener('click', handleScoreButtonClick);
+    });
+    HAND_FORM.querySelectorAll('.volo-btn').forEach(button => {
+      button.addEventListener('click', handleVoloButtonClick);
     });
   }
 }
@@ -274,6 +278,25 @@ function handleScoreButtonClick(event) {
   }
   
   input.value = currentValue;
+}
+
+function handleVoloButtonClick(event) {
+  event.preventDefault();
+  if (!HAND_FORM) return;
+  
+  const button = event.target;
+  const playerIndex = Number(button.dataset.playerIndex);
+  const input = HAND_FORM.querySelector(`input[data-player-index="${playerIndex}"]`);
+  
+  if (!input) return;
+  
+  // Sottrai 21 punti (aggiungi 21 al punteggio della mano, che viene sottratto dal totale)
+  const currentValue = Number(input.value) || 0;
+  input.value = currentValue + 21;
+  
+  // Aggiungi effetto visivo al bottone
+  button.classList.add('volo-triggered');
+  setTimeout(() => button.classList.remove('volo-triggered'), 600);
 }
 
 function resetToSetup() {
