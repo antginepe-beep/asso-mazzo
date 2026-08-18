@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asso Mazzo - Punteggio</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Asso Mazzo" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Asso Mazzo</p>
+          <h1>Gestione punteggio</h1>
+        </div>
+        <button id="new-match-button" class="ghost-button" type="button" hidden>
+          Nuova partita
+        </button>
+      </header>
+
+      <section id="setup-screen" class="panel">
+        <h2>Configurazione iniziale</h2>
+        <form id="setup-form">
+          <div class="field-row">
+            <label>
+              Numero giocatori
+              <input id="player-count" type="number" min="2" max="8" value="4" />
+            </label>
+          </div>
+
+          <div id="player-inputs" class="player-inputs"></div>
+
+          <div class="field-row split">
+            <label>
+              Limite punti
+              <select id="target-points">
+                <option value="151">151</option>
+                <option value="201">201</option>
+              </select>
+            </label>
+
+            <label>
+              Primo mazziere
+              <select id="first-dealer"></select>
+            </label>
+          </div>
+
+          <button class="primary-button" type="submit">Avvia partita</button>
+        </form>
+      </section>
+
+      <section id="game-screen" class="panel" hidden>
+        <div class="status-bar">
+          <div>
+            <span class="label">Punteggio obiettivo</span>
+            <strong id="target-display">151</strong>
+          </div>
+          <div>
+            <span class="label">Mazziere di turno</span>
+            <strong id="dealer-display" class="dealer-pill">-</strong>
+          </div>
+          <div>
+            <span class="label">Mano</span>
+            <strong id="round-display">1</strong>
+          </div>
+        </div>
+
+        <div id="winner-banner" class="winner-banner" hidden></div>
+
+        <div class="game-layout">
+          <div class="board-column">
+            <h2>Tabellone di gioco</h2>
+            <form id="hand-form" class="hand-form"></form>
+            <div class="actions-row">
+              <button id="advance-turn" class="primary-button" type="button">
+                Conferma mano
+              </button>
+            </div>
+          </div>
+
+          <aside class="ranking-column">
+            <h2>Classifica</h2>
+            <div id="classification" class="classification"></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="script.js"></script>
+    
+    <script>
+      // Register Service Worker for PWA support
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registrato:', registration);
+          })
+          .catch(error => {
+            console.log('Service Worker registration fallito:', error);
+          });
+      }
+    </script>
+  </body>
+</html>

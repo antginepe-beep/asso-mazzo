@@ -1,0 +1,282 @@
+const MAX_HISTORY = 5;
+const state = {
+  matchHistory: [],
+  currentGame: null,
+};
+
+const PLAYER_COUNT_INPUT = typeof document !== 'undefined' ? document.getElementById('player-count') : null;
+const PLAYER_INPUTS_CONTAINER = typeof document !== 'undefined' ? document.getElementById('player-inputs') : null;
+const FIRST_DEALER_SELECT = typeof document !== 'undefined' ? document.getElementById('first-dealer') : null;
+const TARGET_POINTS_SELECT = typeof document !== 'undefined' ? document.getElementById('target-points') : null;
+const SETUP_FORM = typeof document !== 'undefined' ? document.getElementById('setup-form') : null;
+const GAME_SCREEN = typeof document !== 'undefined' ? document.getElementById('game-screen') : null;
+const SETUP_SCREEN = typeof document !== 'undefined' ? document.getElementById('setup-screen') : null;
+const HAND_FORM = typeof document !== 'undefined' ? document.getElementById('hand-form') : null;
+const CLASSIFICATION_CONTAINER = typeof document !== 'undefined' ? document.getElementById('classification') : null;
+const DEALER_DISPLAY = typeof document !== 'undefined' ? document.getElementById('dealer-display') : null;
+const ROUND_DISPLAY = typeof document !== 'undefined' ? document.getElementById('round-display') : null;
+const TARGET_DISPLAY = typeof document !== 'undefined' ? document.getElementById('target-display') : null;
+const WINNER_BANNER = typeof document !== 'undefined' ? document.getElementById('winner-banner') : null;
+const NEW_MATCH_BUTTON = typeof document !== 'undefined' ? document.getElementById('new-match-button') : null;
+const ADVANCE_TURN_BUTTON = typeof document !== 'undefined' ? document.getElementById('advance-turn') : null;
+
+export function buildPlayers(names) {
+  return names.map((name, index) => ({
+    id: index,
+    name: name.trim(),
+    total: 0,
+    handScores: [],
+  }));
+}
+
+export function rotateDealer(currentIndex, playerCount) {
+  if (playerCount <= 0) {
+    return 0;
+  }
+
+  return (currentIndex + 1) % playerCount;
+}
+
+export function createGame({ playerNames, targetPoints = 151, firstDealerIndex = 0 }) {
+  return {
+    targetPoints,
+    players: buildPlayers(playerNames),
+    dealerIndex: firstDealerIndex,
+    roundNumber: 1,
+    isFinished: false,
+    winner: null,
+  };
+}
+
+export function calculateWinner(players) {
+  const lowestTotal = Math.min(...players.map((player) => player.total));
+  const winners = players.filter((player) => player.total === lowestTotal);
+  return winners[0] ?? null;
+}
+
+export function getWinProbability(playerName, matchHistory) {
+  const recentHistory = matchHistory.slice(-MAX_HISTORY);
+  const wins = recentHistory.filter((winnerName) => winnerName === playerName).length;
+  const denominator = recentHistory.length > 0 ? recentHistory.length : 1;
+  return Math.round((wins / denominator) * 100);
+}
+
+export function computeLeaderboard(players, matchHistory = []) {
+  return players
+    .map((player) => ({
+      ...player,
+      averagePoints: player.handScores.length ? player.total / player.handScores.length : 0,
+      winProbability: getWinProbability(player.name, matchHistory),
+    }))
+    .sort((left, right) => {
+      if (left.total !== right.total) {
+        return left.total - right.total;
+      }
+      return left.name.localeCompare(right.name);
+    });
+}
+
+export function applyHandToGame(game, handScores) {
+  const normalizedScores = handScores.map((score) => Number(score) || 0);
+
+  if (normalizedScores.length !== game.players.length) {
+    throw new Error('Il numero di punteggi deve corrispondere al numero di giocatori.');
+  }
+
+  game.players.forEach((player, index) => {
+    const score = Math.max(0, normalizedScores[index]);
+    player.total += score;
+    player.handScores.push(score);
+  });
+
+  if (game.players.some((player) => player.total >= game.targetPoints)) {
+    const winner = calculateWinner(game.players);
+    game.isFinished = true;
+    game.winner = winner ? winner.name : null;
+    return game;
+  }
+
+  game.dealerIndex = rotateDealer(game.dealerIndex, game.players.length);
+  game.roundNumber += 1;
+  return game;
+}
+
+function renderPlayerInputs() {
+  if (!PLAYER_COUNT_INPUT || !PLAYER_INPUTS_CONTAINER || !FIRST_DEALER_SELECT) {
+    return;
+  }
+
+  const playerCount = Number(PLAYER_COUNT_INPUT.value) || 2;
+  const currentNames = Array.from(PLAYER_INPUTS_CONTAINER.querySelectorAll('input')).map((input) => input.value);
+  const safeNames = currentNames.length ? currentNames : Array.from({ length: playerCount }, (_, index) => `Giocatore ${index + 1}`);
+
+  PLAYER_INPUTS_CONTAINER.innerHTML = Array.from({ length: playerCount }, (_, index) => {
+    const value = safeNames[index] || `Giocatore ${index + 1}`;
+    return `
+      <label>
+        Nome giocatore ${index + 1}
+        <input type="text" class="player-name-input" value="${value}" maxlength="20" />
+      </label>
+    `;
+  }).join('');
+
+  populateDealerOptions();
+}
+
+function populateDealerOptions() {
+  if (!PLAYER_INPUTS_CONTAINER || !FIRST_DEALER_SELECT) {
+    return;
+  }
+
+  const playerNames = Array.from(PLAYER_INPUTS_CONTAINER.querySelectorAll('.player-name-input')).map((input) => input.value.trim() || 'Giocatore');
+  const dealerOptions = playerNames
+    .map((name, index) => `<option value="${index}">${name}</option>`)
+    .join('');
+
+  FIRST_DEALER_SELECT.innerHTML = dealerOptions;
+  FIRST_DEALER_SELECT.value = String(Math.min(Number(FIRST_DEALER_SELECT.value) || 0, playerNames.length - 1));
+}
+
+function openGame() {
+  const players = Array.from(PLAYER_INPUTS_CONTAINER.querySelectorAll('.player-name-input'))
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+
+  if (players.length < 2) {
+    return;
+  }
+
+  const targetPoints = Number(TARGET_POINTS_SELECT.value) || 151;
+  const firstDealerIndex = Number(FIRST_DEALER_SELECT.value) || 0;
+
+  state.currentGame = createGame({
+    playerNames: players,
+    targetPoints,
+    firstDealerIndex,
+  });
+
+  SETUP_SCREEN.hidden = true;
+  GAME_SCREEN.hidden = false;
+  NEW_MATCH_BUTTON.hidden = false;
+  renderGameBoard();
+}
+
+function renderGameBoard() {
+  const game = state.currentGame;
+  if (!game) {
+    return;
+  }
+
+  if (!TARGET_DISPLAY || !DEALER_DISPLAY || !ROUND_DISPLAY || !HAND_FORM || !CLASSIFICATION_CONTAINER || !WINNER_BANNER) {
+    return;
+  }
+
+  TARGET_DISPLAY.textContent = String(game.targetPoints);
+  DEALER_DISPLAY.textContent = game.players[game.dealerIndex]?.name ?? '-';
+  ROUND_DISPLAY.textContent = String(game.roundNumber);
+
+  if (game.isFinished && game.winner) {
+    const sortedPlayers = computeLeaderboard(game.players, state.matchHistory);
+    const winner = sortedPlayers[0];
+    WINNER_BANNER.hidden = false;
+    WINNER_BANNER.textContent = `Partita terminata: ${winner.name} vince con ${winner.total} punti.`;
+  } else {
+    WINNER_BANNER.hidden = true;
+  }
+
+  HAND_FORM.innerHTML = game.players
+    .map((player, index) => {
+      const currentTotal = game.players[index].total;
+      return `
+        <div class="hand-row">
+          <div>
+            <strong>${player.name}</strong>
+            <span class="small-total">Totale: ${currentTotal} punti</span>
+          </div>
+          <label>
+            Punti
+            <input type="number" min="0" step="1" value="0" data-player-index="${index}" />
+          </label>
+        </div>
+      `;
+    })
+    .join('');
+
+  const leaderboard = computeLeaderboard(game.players, state.matchHistory);
+  CLASSIFICATION_CONTAINER.innerHTML = leaderboard
+    .map((player, index) => {
+      const leaderTag = index === 0 ? ' <span>●</span>' : '';
+      return `
+        <div class="rank-card ${index === 0 ? 'is-leader' : ''}">
+          <div class="rank-head">
+            <strong>#${index + 1} ${player.name}${leaderTag}</strong>
+            <span>${player.total} pt</span>
+          </div>
+          <div class="rank-meta">
+            <span>Media: ${player.averagePoints.toFixed(1)}</span>
+            <span>Prob. vittoria (5): ${player.winProbability}%</span>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function completeHand() {
+  if (!state.currentGame || state.currentGame.isFinished || !HAND_FORM) {
+    return;
+  }
+
+  const scores = Array.from(HAND_FORM.querySelectorAll('input')).map((input) => input.value);
+  const nextGame = applyHandToGame(state.currentGame, scores);
+  state.currentGame = nextGame;
+
+  if (nextGame.isFinished && nextGame.winner) {
+    state.matchHistory.push(nextGame.winner);
+    if (state.matchHistory.length > MAX_HISTORY) {
+      state.matchHistory = state.matchHistory.slice(-MAX_HISTORY);
+    }
+  }
+
+  renderGameBoard();
+}
+
+function resetToSetup() {
+  state.currentGame = null;
+  if (WINNER_BANNER) {
+    WINNER_BANNER.hidden = true;
+  }
+  if (GAME_SCREEN) {
+    GAME_SCREEN.hidden = true;
+  }
+  if (SETUP_SCREEN) {
+    SETUP_SCREEN.hidden = false;
+  }
+  if (NEW_MATCH_BUTTON) {
+    NEW_MATCH_BUTTON.hidden = true;
+  }
+  if (PLAYER_COUNT_INPUT) {
+    PLAYER_COUNT_INPUT.value = '4';
+  }
+  renderPlayerInputs();
+}
+
+if (PLAYER_COUNT_INPUT) {
+  PLAYER_COUNT_INPUT.addEventListener('input', renderPlayerInputs);
+}
+if (SETUP_FORM) {
+  SETUP_FORM.addEventListener('submit', (event) => {
+    event.preventDefault();
+    openGame();
+  });
+}
+if (ADVANCE_TURN_BUTTON) {
+  ADVANCE_TURN_BUTTON.addEventListener('click', completeHand);
+}
+if (NEW_MATCH_BUTTON) {
+  NEW_MATCH_BUTTON.addEventListener('click', resetToSetup);
+}
+
+if (typeof document !== 'undefined') {
+  renderPlayerInputs();
+}
