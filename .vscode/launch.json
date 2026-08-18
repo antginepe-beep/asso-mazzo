@@ -7,7 +7,7 @@
       "name": "Asso Mazzo - Browser",
       "type": "pwa-chrome",
       "request": "launch",
-      "file": "${workspaceFolder}/index.html"
+      "url": "http://localhost:8000"
     }
   ]
 }
