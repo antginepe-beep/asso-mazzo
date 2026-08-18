@@ -88,6 +88,7 @@ const STATS_TOGGLE_BUTTON = typeof document !== 'undefined' ? document.getElemen
 const STATS_SCREEN = typeof document !== 'undefined' ? document.getElementById('stats-screen') : null;
 const GLOBAL_STATS_CONTENT = typeof document !== 'undefined' ? document.getElementById('global-stats-content') : null;
 const RESET_STATS_BUTTON = typeof document !== 'undefined' ? document.getElementById('reset-stats-button') : null;
+const STATS_BACK_BUTTON = typeof document !== 'undefined' ? document.getElementById('stats-back-button') : null;
 
 export function buildPlayers(names) {
   return names.map((name, index) => ({
@@ -577,7 +578,7 @@ function renderGlobalStats() {
     return;
   }
 
-  const stats = Object.values(state.globalStats || {}).sort((left, right) => right.matches - left.matches || right.wins - left.wins);
+  const stats = Object.values(state.globalStats || {}).sort((left, right) => right.wins - left.wins || right.matches - left.matches || left.name.localeCompare(right.name));
 
   if (!stats.length) {
     GLOBAL_STATS_CONTENT.innerHTML = '<div class="empty-state">Nessuna statistica salvata.</div>';
@@ -585,31 +586,55 @@ function renderGlobalStats() {
   }
 
   GLOBAL_STATS_CONTENT.innerHTML = `
-    <div class="global-stats-grid">
-      ${stats
-        .map((entry) => `
-          <article class="global-stat-card">
-            <span class="stat-label">${entry.name}</span>
-            <strong>${entry.wins} vittorie</strong>
-            <small>Partite: ${entry.matches} • Mani: ${entry.handsPlayed} • Volo: ${entry.voloCount}</small>
-          </article>
-        `)
-        .join('')}
+    <div class="stats-table-wrap">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Giocatore</th>
+            <th>Vittorie</th>
+            <th>Partite</th>
+            <th>Mani</th>
+            <th>Volo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${stats
+            .map((entry, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td><strong>${entry.name}</strong></td>
+                <td>${entry.wins}</td>
+                <td>${entry.matches}</td>
+                <td>${entry.handsPlayed}</td>
+                <td>${entry.voloCount}</td>
+              </tr>
+            `)
+            .join('')}
+        </tbody>
+      </table>
     </div>
   `;
 }
 
 function toggleStatsView() {
   state.statsViewVisible = !state.statsViewVisible;
+
   if (STATS_SCREEN) {
     STATS_SCREEN.hidden = !state.statsViewVisible;
   }
-  if (GAME_SCREEN) {
-    GAME_SCREEN.hidden = state.statsViewVisible;
-  }
-  if (SETUP_SCREEN) {
+
+  if (state.currentGame) {
+    if (GAME_SCREEN) {
+      GAME_SCREEN.hidden = state.statsViewVisible;
+    }
+    if (SETUP_SCREEN) {
+      SETUP_SCREEN.hidden = true;
+    }
+  } else if (SETUP_SCREEN) {
     SETUP_SCREEN.hidden = state.statsViewVisible;
   }
+
   if (STATS_TOGGLE_BUTTON) {
     STATS_TOGGLE_BUTTON.textContent = state.statsViewVisible ? 'Torna al gioco' : 'Statistiche';
   }
@@ -660,6 +685,24 @@ if (RESET_STATS_BUTTON) {
   RESET_STATS_BUTTON.addEventListener('click', () => {
     resetGlobalStats();
     renderGlobalStats();
+  });
+}
+if (STATS_BACK_BUTTON) {
+  STATS_BACK_BUTTON.addEventListener('click', () => {
+    if (state.statsViewVisible) {
+      state.statsViewVisible = false;
+      if (STATS_SCREEN) {
+        STATS_SCREEN.hidden = true;
+      }
+      if (state.currentGame && GAME_SCREEN) {
+        GAME_SCREEN.hidden = false;
+      } else if (SETUP_SCREEN) {
+        SETUP_SCREEN.hidden = false;
+      }
+      if (STATS_TOGGLE_BUTTON) {
+        STATS_TOGGLE_BUTTON.textContent = 'Statistiche';
+      }
+    }
   });
 }
 

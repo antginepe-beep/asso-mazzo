@@ -351,6 +351,7 @@ button:hover {
 
 .stats-screen {
   margin-top: 20px;
+  background: linear-gradient(180deg, rgba(12, 28, 25, 0.98), rgba(9, 20, 17, 0.98));
 }
 
 .stats-screen-header {
@@ -358,7 +359,13 @@ button:hover {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.stats-screen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .danger-button {
@@ -372,19 +379,46 @@ button:hover {
   gap: 12px;
 }
 
-.global-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+.stats-table-wrap {
+  background: rgba(10, 18, 15, 0.7);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
 }
 
-.global-stat-card {
-  display: grid;
-  gap: 6px;
-  background: linear-gradient(180deg, rgba(18, 45, 35, 0.92), rgba(10, 24, 20, 0.96));
-  border: 1px solid rgba(247, 201, 72, 0.18);
-  border-radius: 12px;
-  padding: 14px 12px;
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.96rem;
+}
+
+.stats-table thead th {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fce9a8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.stats-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+.stats-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.stats-table tbody tr:hover {
+  background: rgba(245, 158, 11, 0.04);
+}
+
+.stats-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .empty-state {
@@ -393,6 +427,7 @@ button:hover {
   border-radius: 12px;
   text-align: center;
   color: var(--muted);
+  background: rgba(255,255,255,0.02);
 }
 
 .player-stats h3,
@@ -751,9 +786,19 @@ button:hover {
     padding: 12px 14px;
   }
 
-  .stats-screen-header {
+  .stats-screen-header,
+  .stats-screen-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .stats-table {
+    font-size: 0.82rem;
+  }
+
+  .stats-table thead th,
+  .stats-table tbody td {
+    padding: 10px 8px;
   }
 
   .label {
