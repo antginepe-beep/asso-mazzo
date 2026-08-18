@@ -586,6 +586,11 @@ function renderGlobalStats() {
   }
 
   GLOBAL_STATS_CONTENT.innerHTML = `
+    <div class="stats-summary">
+      <div class="summary-pill live-pill">LIVE</div>
+      <div class="summary-pill">${stats.length} giocatori</div>
+      <div class="summary-pill">Top 3: ${stats.slice(0, 3).map((entry) => entry.name).join(', ') || '—'}</div>
+    </div>
     <div class="stats-table-wrap">
       <table class="stats-table">
         <thead>
@@ -600,16 +605,27 @@ function renderGlobalStats() {
         </thead>
         <tbody>
           ${stats
-            .map((entry, index) => `
-              <tr>
-                <td>${index + 1}</td>
-                <td><strong>${entry.name}</strong></td>
-                <td>${entry.wins}</td>
-                <td>${entry.matches}</td>
-                <td>${entry.handsPlayed}</td>
-                <td>${entry.voloCount}</td>
-              </tr>
-            `)
+            .map((entry, index) => {
+              const badge = index === 0 ? 'Campione' : index === 1 ? 'Vice' : index === 2 ? 'Podio' : 'Classifica';
+              const rowClass = index === 0 ? 'is-leader' : index === 1 ? 'is-silver' : index === 2 ? 'is-bronze' : '';
+              return `
+                <tr class="${rowClass}">
+                  <td class="rank-cell">
+                    <span class="rank-badge">${index + 1}</span>
+                  </td>
+                  <td>
+                    <div class="player-name-wrap">
+                      <strong>${entry.name}</strong>
+                      <span class="mini-tag">${badge}</span>
+                    </div>
+                  </td>
+                  <td>${entry.wins}</td>
+                  <td>${entry.matches}</td>
+                  <td>${entry.handsPlayed}</td>
+                  <td>${entry.voloCount}</td>
+                </tr>
+              `;
+            })
             .join('')}
         </tbody>
       </table>

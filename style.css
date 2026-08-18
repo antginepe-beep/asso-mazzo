@@ -376,7 +376,33 @@ button:hover {
 
 .global-stats-content {
   display: grid;
-  gap: 12px;
+  gap: 14px;
+}
+
+.stats-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-pill {
+  background: rgba(34, 197, 94, 0.14);
+  color: #bbf7d0;
+  border-color: rgba(34, 197, 94, 0.35);
 }
 
 .stats-table-wrap {
@@ -384,6 +410,7 @@ button:hover {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 .stats-table {
@@ -410,15 +437,66 @@ button:hover {
 }
 
 .stats-table tbody tr {
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .stats-table tbody tr:hover {
   background: rgba(245, 158, 11, 0.04);
 }
 
+.stats-table tbody tr.is-leader {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(255,255,255,0.01));
+}
+
+.stats-table tbody tr.is-silver {
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.08), rgba(255,255,255,0.01));
+}
+
+.stats-table tbody tr.is-bronze {
+  background: linear-gradient(90deg, rgba(234, 88, 12, 0.08), rgba(255,255,255,0.01));
+}
+
 .stats-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.rank-cell {
+  width: 54px;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.player-name-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mini-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(247, 201, 72, 0.12);
+  color: #f8d86a;
+  border: 1px solid rgba(247, 201, 72, 0.2);
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
 }
 
 .empty-state {
