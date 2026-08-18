@@ -244,7 +244,7 @@ label {
 input,
 select {
   border: none;
-  border-bottom: 2px solid rgba(17, 17, 17, 0.14);
+  border-bottom: 2px solid rgba(17, 17, 17, 0.22);
   border-radius: 0;
   background: transparent;
   color: #111111;
@@ -257,13 +257,13 @@ select {
 }
 
 input::placeholder {
-  color: #8a8f99;
+  color: #707980;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-bottom-color: rgba(214, 13, 29, 0.75);
+  border-bottom-color: #d60d1d;
   background: transparent;
   box-shadow: none;
 }
@@ -331,8 +331,9 @@ button:hover {
 .ghost-button {
   background: #ffffff;
   color: var(--text);
-  border: 1px solid rgba(17, 17, 17, 0.12);
+  border: 1px solid rgba(17, 17, 17, 0.20);
   padding: 10px 14px;
+  font-weight: 600;
 }
 
 .player-inputs {
@@ -368,8 +369,9 @@ button:hover {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #b5bac2;
+  color: #5a606a;
   margin-bottom: 8px;
+  font-weight: 600;
 }
 
 .dealer-pill {
@@ -379,9 +381,10 @@ button:hover {
   min-width: 92px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(214, 13, 29, 0.12);
-  color: #ff7581;
-  border: 1px solid rgba(214, 13, 29, 0.2);
+  background: rgba(214, 13, 29, 0.14);
+  color: #e81828;
+  border: 1px solid rgba(214, 13, 29, 0.3);
+  font-weight: 700;
 }
 
 .winner-banner {
@@ -451,15 +454,15 @@ button:hover {
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 2px solid rgba(17, 17, 17, 0.12);
+  border-bottom: 2px solid rgba(17, 17, 17, 0.18);
   color: #111111;
   padding: 8px 0;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
 }
 
 .hand-row input:focus {
-  border-bottom-color: rgba(214, 13, 29, 0.6);
+  border-bottom-color: #d60d1d;
 }
 
 .actions-row {
